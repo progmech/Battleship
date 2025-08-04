@@ -62,7 +62,30 @@ internal sealed class Board
 
     private bool TryPlaceShipVertical(int shipSize, int x, int y)
     {
-        throw new NotImplementedException();
+        int lowCoord = y > BoardSide - shipSize ? y - shipSize + 1 : y;
+        int highCoord = y > BoardSide - shipSize ? y : y + shipSize - 1;
+
+        int lowIndex = lowCoord - 1 < 0 ? 0 : lowCoord - 1;
+        int highIndex = highCoord + 1 > BoardSide - 1
+            ? BoardSide - 1
+            : highCoord + 1;
+
+        int leftIndex = x - 1 < 0 ? 0 : x - 1;
+        int rightIndex = x + 1 > BoardSide - 1
+            ? BoardSide - 1
+            : x + 1;
+
+        if (HasNeighbour(leftIndex, rightIndex, lowIndex, highIndex))
+        {
+            return false;
+        }
+
+        for (int v = lowCoord; v <= highCoord; v++)
+        {
+            _board[v, x].State = CellState.Unbroken;
+        }
+
+        return true;
     }
 
     private bool TryPlaceShipHorizontal(int shipSize, int x, int y)
@@ -95,7 +118,18 @@ internal sealed class Board
 
     private bool HasNeighbour(int leftIndex, int rightIndex, int lowIndex, int highIndex)
     {
-        throw new NotImplementedException();
+        for (int v = lowIndex; v <= highIndex; v++)
+        {
+            for (int h = leftIndex; h <= rightIndex; h++)
+            {
+                if (_board[v, h].State == CellState.Unbroken)
+                {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 
     public void Print()
