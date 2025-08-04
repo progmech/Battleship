@@ -4,7 +4,7 @@ namespace Battleship;
 
 internal sealed class Cell
 {
-    public CellState State { get; private set; } = CellState.Empty;
+    public CellState State { get; set; } = CellState.Empty;
 
     public override string ToString()
     {
