@@ -1,7 +1,11 @@
 namespace Battleship;
 
-public class Game
+public sealed class Game
 {
+    private Board _playerBoard;
+
+    private Board _machineBoard;
+
     public void Start()
     {
         GameState userChoice;
@@ -41,7 +45,17 @@ public class Game
 
     private void New()
     {
-        Console.WriteLine("Coming soon...");
+        _playerBoard = new();
+        _machineBoard = new();
+        PrintBoard();
+    }
+
+    private void PrintBoard()
+    {
+        Console.WriteLine("Ваша доска:\n");
+        _playerBoard.Print();
+        Console.WriteLine("\nДоска компьютера:\n");
+        _machineBoard.Print();
     }
 
     private void Quit()
