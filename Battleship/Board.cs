@@ -1,4 +1,3 @@
-using System;
 using System.Text;
 
 namespace Battleship;
@@ -13,7 +12,7 @@ internal sealed class Board
 
     private readonly Cell[,] _board;
 
-    public Board()
+    public Board(bool autoGenerate)
     {
         _board = new Cell[BoardSide, BoardSide];
 
@@ -24,6 +23,51 @@ internal sealed class Board
                 _board[v, h] = new Cell();
             }
         }
+
+        if (autoGenerate)
+        {
+            GenerateShips();
+        }
+    }
+
+    private void GenerateShips()
+    {
+        foreach (int shipSize in _ships)
+        {
+            CalculateShip(shipSize);
+        }
+    }
+
+    private void CalculateShip(int shipSize)
+    {
+        Random rnd = new();
+        Line line = (Line)rnd.Next(0, 2);
+        int x, y;
+        do
+        {
+            x = rnd.Next(0, 10);
+            y = rnd.Next(0, 10);
+        } while (!TryPlaceShip(line, shipSize, x, y));
+    }
+
+    private bool TryPlaceShip(Line line, int shipSize, int x, int y)
+    {
+        return line switch
+        {
+            Line.Horizontal => TryPlaceShipHorizontal(shipSize, x, y),
+            Line.Vertical => TryPlaceShipVertical(shipSize, x, y),
+            _ => true
+        };
+    }
+
+    private bool TryPlaceShipVertical(int shipSize, int x, int y)
+    {
+        throw new NotImplementedException();
+    }
+
+    private bool TryPlaceShipHorizontal(int shipSize, int x, int y)
+    {
+        throw new NotImplementedException();
     }
 
     public void Print()
