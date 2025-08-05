@@ -11,8 +11,8 @@ public sealed class Game
         GameState userChoice;
         do
         {
-            PrintMenu();
-            userChoice = ValidateInput();
+            Dialog.PrintMenu();
+            userChoice = Dialog.ValidateInput();
             switch (userChoice)
             {
                 case GameState.Quit:
@@ -45,8 +45,8 @@ public sealed class Game
 
     private void New()
     {
-        _playerBoard = new(false);
         _machineBoard = new(true);
+        _playerBoard = new(Dialog.AutoGenerateUserBoard());
         PrintBoard();
     }
 
@@ -61,30 +61,5 @@ public sealed class Game
     private void Quit()
     {
         Console.WriteLine("Выход");
-    }
-
-    private GameState ValidateInput()
-    {
-        string userInput = Console.ReadLine();
-
-        if (string.IsNullOrWhiteSpace(userInput)
-        || !int.TryParse(userInput, out int userChoice)
-        || userChoice < (int)GameState.Quit
-        || userChoice > (int)GameState.Save)
-        {
-            Console.WriteLine("Неправильный ввод! Введите число от 0 до 3.");
-            return GameState.Menu;
-        }
-
-        return (GameState)userChoice;
-    }
-
-    private void PrintMenu()
-    {
-        Console.WriteLine("\n1. Новая игра");
-        Console.WriteLine("2. Загрузить игру");
-        Console.WriteLine("3. Сохранить игру");
-        Console.WriteLine("0. Выход\n");
-        Console.WriteLine("Ваш выбор:");
     }
 }

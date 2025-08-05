@@ -8,12 +8,16 @@ internal sealed class Board
 
     private const string VerticalCoords = "   А Б В Г Д Е Ж З И К";
 
+    private readonly bool _isAutoGenerate;
+
     private readonly int[] _ships = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
 
     private readonly Cell[,] _board;
 
     public Board(bool autoGenerate)
     {
+        _isAutoGenerate = autoGenerate;
+
         _board = new Cell[BoardSide, BoardSide];
 
         for (int v = 0; v < BoardSide; v++)
@@ -27,6 +31,17 @@ internal sealed class Board
         if (autoGenerate)
         {
             GenerateShips();
+            return;
+        }
+
+        AskForShips();
+    }
+
+    private void AskForShips()
+    {
+        foreach (int shipSize in _ships)
+        {
+            Dialog.AskForShip(shipSize);
         }
     }
 
