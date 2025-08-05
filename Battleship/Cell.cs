@@ -1,5 +1,3 @@
-using System;
-
 namespace Battleship;
 
 internal sealed class Cell
@@ -10,9 +8,10 @@ internal sealed class Cell
     {
         return State switch
         {
-            CellState.Empty or CellState.AlongSide => "*",
-            CellState.Damaged or CellState.Destroyed => "X",
-            _ => "?"
+            CellState.Empty => "\u00B7",
+            CellState.Unbroken => "?",
+            CellState.Damaged => "X",
+            _ => "*"
         };
     }
 }

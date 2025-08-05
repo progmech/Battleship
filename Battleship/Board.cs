@@ -216,4 +216,36 @@ internal sealed class Board
         _board[coordY, coordX].State = CellState.OffTarget;
         return false;
     }
+
+    internal bool GetUnshottedCell(int coordY, int coordX)
+    {
+        return
+            _board[coordY, coordX].State != CellState.Damaged
+            && _board[coordY, coordX].State != CellState.OffTarget;
+    }
+
+    internal void ChangeCellStatus(int coordY, int coordX, bool success)
+    {
+        if (success)
+        {
+            _board[coordY, coordX].State = CellState.Damaged;
+            return;
+        }
+        _board[coordY, coordX].State = CellState.OffTarget;
+    }
+
+    internal bool HasUnbrokenCell()
+    {
+        for (int v = 0; v < BoardSide; v++)
+        {
+            for (int h = 0; h < BoardSide; h++)
+            {
+                if (_board[v, h].State == CellState.Unbroken)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
 }

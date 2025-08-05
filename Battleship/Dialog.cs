@@ -154,6 +154,16 @@ internal static class Dialog
         };
 
         Console.WriteLine($"Введите{type} координату по {direction}.");
-        Console.WriteLine($"Или введите 0 для выхода в меню.");
+    }
+
+    internal static bool GetHumanConfirmation(int coordY, int coordX)
+    {
+        Console.WriteLine(
+            $"Ход компьютера. Горизонталь: {_horizontalCoords[coordX]}, Вертикаль: {coordY + 1}");
+        Console.WriteLine("Попал? Да - 1, Нет - любая другая клавиша.");
+        var userInput = Console.ReadLine();
+        return !string.IsNullOrWhiteSpace(userInput)
+            && int.TryParse(userInput, out int userChoice)
+            && userChoice == 1;
     }
 }

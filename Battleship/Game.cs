@@ -1,5 +1,3 @@
-
-
 namespace Battleship;
 
 public sealed class Game
@@ -66,9 +64,21 @@ public sealed class Game
         switch (_currentMove)
         {
             case Move.Human:
+                if (!_machineBoard.HasUnbrokenCell())
+                {
+                    Console.WriteLine("ПОЗДРАВЛЯЕМ! ВЫ ПОБЕДИЛИ!");
+                    _gameIsOn = false;
+                    return;
+                }
                 DoHumanMove();
                 break;
             case Move.Machine:
+                if (!_playerBoard.HasUnbrokenCell())
+                {
+                    Console.WriteLine("ВЫ ПРОИГРАЛИ! Печально...");
+                    _gameIsOn = false;
+                    return;
+                }
                 DoMachineMove();
                 break;
         }
@@ -76,7 +86,26 @@ public sealed class Game
 
     private void DoMachineMove()
     {
-        throw new NotImplementedException();
+        int coordX;
+        int coordY;
+        do
+        {
+            Random rnd = new();
+            coordX = rnd.Next(0, 10);
+            coordY = rnd.Next(0, 10);
+        } while (!_playerBoard.GetUnshottedCell(coordY, coordX));
+
+        bool success = Dialog.GetHumanConfirmation(coordY, coordX);
+
+        _playerBoard.ChangeCellStatus(coordY, coordX, success);
+
+        if (success)
+        {
+            Console.WriteLine("Компьютер попал! Снова его ход!");
+            return;
+        }
+
+        _currentMove = Move.Human;
     }
 
     private void DoHumanMove()
