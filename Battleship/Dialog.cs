@@ -136,6 +136,11 @@ internal static class Dialog
             return true;
         }
 
+        if (userInput == "0")
+        {
+            throw new QuitToSaveException();
+        }
+
         coord = int.MinValue;
         return false;
     }
@@ -154,6 +159,7 @@ internal static class Dialog
         };
 
         Console.WriteLine($"Введите{type} координату по {direction}.");
+        Console.WriteLine($"Или введите 0 для выхода в меню.");
     }
 
     internal static bool GetHumanConfirmation(int coordY, int coordX)

@@ -4,7 +4,9 @@ namespace Battleship;
 
 internal sealed class Board
 {
-    private const int BoardSide = 10;
+    internal const int BoardSide = 10;
+
+    internal Cell[,] UnderlyingBoard { get; private set; }
 
     private const string VerticalCoords = "   А Б В Г Д Е Ж З И К";
 
@@ -12,19 +14,18 @@ internal sealed class Board
 
     private readonly int[] _ships = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
 
-    private readonly Cell[,] _board;
 
     public Board(bool autoGenerate)
     {
         _isAutoGenerate = autoGenerate;
 
-        _board = new Cell[BoardSide, BoardSide];
+        UnderlyingBoard = new Cell[BoardSide, BoardSide];
 
         for (int v = 0; v < BoardSide; v++)
         {
             for (int h = 0; h < BoardSide; h++)
             {
-                _board[v, h] = new Cell();
+                UnderlyingBoard[v, h] = new Cell();
             }
         }
 
@@ -124,7 +125,7 @@ internal sealed class Board
 
         for (int v = lowCoord; v <= highCoord; v++)
         {
-            _board[v, ship.StartX].State = CellState.Unbroken;
+            UnderlyingBoard[v, ship.StartX].State = CellState.Unbroken;
         }
 
         return true;
@@ -166,7 +167,7 @@ internal sealed class Board
 
         for (int h = leftCoord; h <= rightCoord; h++)
         {
-            _board[ship.StartY, h].State = CellState.Unbroken;
+            UnderlyingBoard[ship.StartY, h].State = CellState.Unbroken;
         }
 
         return true;
@@ -178,7 +179,7 @@ internal sealed class Board
         {
             for (int h = leftIndex; h <= rightIndex; h++)
             {
-                if (_board[v, h].State == CellState.Unbroken)
+                if (UnderlyingBoard[v, h].State == CellState.Unbroken)
                 {
                     return true;
                 }
@@ -197,7 +198,7 @@ internal sealed class Board
             sb.Append($"{v + 1}".PadRight(3));
             for (int h = 0; h < BoardSide; h++)
             {
-                sb.Append(_board[v, h]);
+                sb.Append(UnderlyingBoard[v, h]);
                 sb.Append(' ');
             }
             Console.WriteLine(sb.ToString().TrimEnd());
@@ -206,32 +207,32 @@ internal sealed class Board
 
     internal bool CheckHumanMove(int coordY, int coordX)
     {
-        if (_board[coordY, coordX].State == CellState.Unbroken
-        || _board[coordY, coordX].State == CellState.Damaged)
+        if (UnderlyingBoard[coordY, coordX].State == CellState.Unbroken
+        || UnderlyingBoard[coordY, coordX].State == CellState.Damaged)
         {
-            _board[coordY, coordX].State = CellState.Damaged;
+            UnderlyingBoard[coordY, coordX].State = CellState.Damaged;
             return true;
         }
 
-        _board[coordY, coordX].State = CellState.OffTarget;
+        UnderlyingBoard[coordY, coordX].State = CellState.OffTarget;
         return false;
     }
 
     internal bool GetUnshottedCell(int coordY, int coordX)
     {
         return
-            _board[coordY, coordX].State != CellState.Damaged
-            && _board[coordY, coordX].State != CellState.OffTarget;
+            UnderlyingBoard[coordY, coordX].State != CellState.Damaged
+            && UnderlyingBoard[coordY, coordX].State != CellState.OffTarget;
     }
 
     internal void ChangeCellStatus(int coordY, int coordX, bool success)
     {
         if (success)
         {
-            _board[coordY, coordX].State = CellState.Damaged;
+            UnderlyingBoard[coordY, coordX].State = CellState.Damaged;
             return;
         }
-        _board[coordY, coordX].State = CellState.OffTarget;
+        UnderlyingBoard[coordY, coordX].State = CellState.OffTarget;
     }
 
     internal bool HasUnbrokenCell()
@@ -240,7 +241,7 @@ internal sealed class Board
         {
             for (int h = 0; h < BoardSide; h++)
             {
-                if (_board[v, h].State == CellState.Unbroken)
+                if (UnderlyingBoard[v, h].State == CellState.Unbroken)
                 {
                     return true;
                 }

@@ -2,11 +2,11 @@ namespace Battleship;
 
 public sealed class Game
 {
-    private Board _playerBoard;
+    internal Board PlayerBoard { get; set; }
 
-    private Board _machineBoard;
+    internal Board MachineBoard { get; set; }
 
-    private Move _currentMove = Move.Human;
+    internal Move CurrentMove { get; set; } = Move.Human;
 
     private bool _gameIsOn = true;
 
@@ -39,7 +39,22 @@ public sealed class Game
 
     private void Save()
     {
-        Console.WriteLine("Будет реализовано в следующей версии.");
+        string filePath = string.Empty;
+        try
+        {
+            filePath = GameKeeper.Save(this);
+            Console.WriteLine($"Игра успешно сохранена в файл {filePath}");
+            Console.WriteLine($"Для возврата в игру загрузите этот файл в пункте 'Загрузить'.");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка сохранения игры в файл {filePath}.");
+            Console.WriteLine(ex.Message);
+        }
+        finally
+        {
+            Start();
+        }
     }
 
     private void Load()
@@ -49,31 +64,39 @@ public sealed class Game
 
     private void New()
     {
-        _machineBoard = new(true);
-        _playerBoard = new(Dialog.AutoGenerateUserBoard());
+        MachineBoard = new(true);
+        PlayerBoard = new(Dialog.AutoGenerateUserBoard());
         while (_gameIsOn)
         {
             DoNextMove();
         }
-        PrintBoard();
+
+        Start();
     }
 
     private void DoNextMove()
     {
         PrintBoard();
-        switch (_currentMove)
+        switch (CurrentMove)
         {
             case Move.Human:
-                if (!_machineBoard.HasUnbrokenCell())
+                if (!MachineBoard.HasUnbrokenCell())
                 {
                     Console.WriteLine("ПОЗДРАВЛЯЕМ! ВЫ ПОБЕДИЛИ!");
                     _gameIsOn = false;
                     return;
                 }
-                DoHumanMove();
+                try
+                {
+                    DoHumanMove();
+                }
+                catch (QuitToSaveException)
+                {
+                    _gameIsOn = false;
+                }
                 break;
             case Move.Machine:
-                if (!_playerBoard.HasUnbrokenCell())
+                if (!PlayerBoard.HasUnbrokenCell())
                 {
                     Console.WriteLine("ВЫ ПРОИГРАЛИ! Печально...");
                     _gameIsOn = false;
@@ -93,11 +116,11 @@ public sealed class Game
             Random rnd = new();
             coordX = rnd.Next(0, 10);
             coordY = rnd.Next(0, 10);
-        } while (!_playerBoard.GetUnshottedCell(coordY, coordX));
+        } while (!PlayerBoard.GetUnshottedCell(coordY, coordX));
 
         bool success = Dialog.GetHumanConfirmation(coordY, coordX);
 
-        _playerBoard.ChangeCellStatus(coordY, coordX, success);
+        PlayerBoard.ChangeCellStatus(coordY, coordX, success);
 
         if (success)
         {
@@ -105,7 +128,7 @@ public sealed class Game
             return;
         }
 
-        _currentMove = Move.Human;
+        CurrentMove = Move.Human;
     }
 
     private void DoHumanMove()
@@ -118,21 +141,21 @@ public sealed class Game
             Console.WriteLine("Введены неправильные координаты!");
         }
 
-        if (_machineBoard.CheckHumanMove(coordY, coordX))
+        if (MachineBoard.CheckHumanMove(coordY, coordX))
         {
             Console.WriteLine("Вы попали! Снова ваш ход!");
             return;
         }
 
-        _currentMove = Move.Machine;
+        CurrentMove = Move.Machine;
     }
 
     private void PrintBoard()
     {
         Console.WriteLine("Ваша доска:\n");
-        _playerBoard.Print();
+        PlayerBoard.Print();
         Console.WriteLine("\nДоска компьютера:\n");
-        _machineBoard.Print();
+        MachineBoard.Print();
     }
 
     private void Quit()
