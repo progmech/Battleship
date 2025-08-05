@@ -41,7 +41,18 @@ internal sealed class Board
     {
         foreach (int shipSize in _ships)
         {
-            Dialog.AskForShip(shipSize);
+            while (true)
+            {
+                Ship ship = Dialog.AskForShip(shipSize);
+                if (TryPlaceShip(ship))
+                {
+                    break;
+                }
+
+                Console.WriteLine("Выявлено соприкосновение кораблей!");
+            }
+
+            Print();
         }
     }
 
@@ -58,37 +69,53 @@ internal sealed class Board
         Random rnd = new();
         Line line = (Line)rnd.Next(0, 2);
         int x, y;
+        Ship ship;
         do
         {
             x = rnd.Next(0, 10);
             y = rnd.Next(0, 10);
-        } while (!TryPlaceShip(line, shipSize, x, y));
+            ship = new Ship(line, shipSize, x, int.MinValue, y, int.MinValue);
+        } while (!TryPlaceShip(ship));
     }
 
-    private bool TryPlaceShip(Line line, int shipSize, int x, int y)
+    private bool TryPlaceShip(Ship ship)
     {
-        return line switch
+        return ship.Line switch
         {
-            Line.Horizontal => TryPlaceShipHorizontal(shipSize, x, y),
-            Line.Vertical => TryPlaceShipVertical(shipSize, x, y),
+            Line.Horizontal => TryPlaceShipHorizontal(ship),
+            Line.Vertical => TryPlaceShipVertical(ship),
             _ => true
         };
     }
 
-    private bool TryPlaceShipVertical(int shipSize, int x, int y)
+    private bool TryPlaceShipVertical(Ship ship)
     {
-        int lowCoord = y > BoardSide - shipSize ? y - shipSize + 1 : y;
-        int highCoord = y > BoardSide - shipSize ? y : y + shipSize - 1;
+        int lowCoord;
+        int highCoord;
+        if (_isAutoGenerate)
+        {
+            lowCoord = ship.StartY > BoardSide - ship.ShipSize
+                ? ship.StartY - ship.ShipSize + 1
+                : ship.StartY;
+            highCoord = ship.StartY > BoardSide - ship.ShipSize
+                ? ship.StartY
+                : ship.StartY + ship.ShipSize - 1;
+        }
+        else
+        {
+            lowCoord = ship.StartY;
+            highCoord = ship.EndY;
+        }
 
         int lowIndex = lowCoord - 1 < 0 ? 0 : lowCoord - 1;
         int highIndex = highCoord + 1 > BoardSide - 1
             ? BoardSide - 1
             : highCoord + 1;
 
-        int leftIndex = x - 1 < 0 ? 0 : x - 1;
-        int rightIndex = x + 1 > BoardSide - 1
+        int leftIndex = ship.StartX - 1 < 0 ? 0 : ship.StartX - 1;
+        int rightIndex = ship.StartX + 1 > BoardSide - 1
             ? BoardSide - 1
-            : x + 1;
+            : ship.StartX + 1;
 
         if (HasNeighbour(leftIndex, rightIndex, lowIndex, highIndex))
         {
@@ -97,26 +124,40 @@ internal sealed class Board
 
         for (int v = lowCoord; v <= highCoord; v++)
         {
-            _board[v, x].State = CellState.Unbroken;
+            _board[v, ship.StartX].State = CellState.Unbroken;
         }
 
         return true;
     }
 
-    private bool TryPlaceShipHorizontal(int shipSize, int x, int y)
+    private bool TryPlaceShipHorizontal(Ship ship)
     {
-        int leftCoord = x > BoardSide - shipSize ? x - shipSize + 1 : x;
-        int rightCoord = x > BoardSide - shipSize ? x : x + shipSize - 1;
+        int leftCoord;
+        int rightCoord;
+        if (_isAutoGenerate)
+        {
+            leftCoord = ship.StartX > BoardSide - ship.ShipSize
+                ? ship.StartX - ship.ShipSize + 1
+                : ship.StartX;
+            rightCoord = ship.StartX > BoardSide - ship.ShipSize
+                ? ship.StartX
+                : ship.StartX + ship.ShipSize - 1;
+        }
+        else
+        {
+            leftCoord = ship.StartX;
+            rightCoord = ship.EndX;
+        }
 
         int leftIndex = leftCoord - 1 < 0 ? 0 : leftCoord - 1;
         int rightIndex = rightCoord + 1 > BoardSide - 1
             ? BoardSide - 1
             : rightCoord + 1;
 
-        int lowIndex = y - 1 < 0 ? 0 : y - 1;
-        int highIndex = y + 1 > BoardSide - 1
+        int lowIndex = ship.StartY - 1 < 0 ? 0 : ship.StartY - 1;
+        int highIndex = ship.StartY + 1 > BoardSide - 1
             ? BoardSide - 1
-            : y + 1;
+            : ship.StartY + 1;
 
         if (HasNeighbour(leftIndex, rightIndex, lowIndex, highIndex))
         {
@@ -125,7 +166,7 @@ internal sealed class Board
 
         for (int h = leftCoord; h <= rightCoord; h++)
         {
-            _board[y, h].State = CellState.Unbroken;
+            _board[ship.StartY, h].State = CellState.Unbroken;
         }
 
         return true;
