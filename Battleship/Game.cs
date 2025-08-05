@@ -59,13 +59,31 @@ public sealed class Game
 
     private void Load()
     {
-        Console.WriteLine("Будет реализовано в следующей версии.");
+        string filePath = string.Empty;
+        try
+        {
+            Console.WriteLine("Загрузка игры. Введите полный путь к файлу:");
+            filePath = Console.ReadLine();
+            GameKeeper.Load(filePath, this);
+            New(false);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Ошибка загрузки игры из файла {filePath}");
+            Console.WriteLine(ex.Message);
+            Start();
+        }
     }
 
-    private void New()
+    private void New(bool isNew = true)
     {
-        MachineBoard = new(true);
-        PlayerBoard = new(Dialog.AutoGenerateUserBoard());
+        _gameIsOn = true;
+        if (isNew)
+        {
+            MachineBoard = new Board(autoGenerate: true);
+            PlayerBoard = new Board(Dialog.AutoGenerateUserBoard());
+        }
+
         while (_gameIsOn)
         {
             DoNextMove();
