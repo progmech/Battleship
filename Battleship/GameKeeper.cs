@@ -8,25 +8,8 @@ public class GameKeeper
     {
         string[] gameInfo = File.ReadAllLines(filePath);
         game.CurrentMove = (Move)int.Parse(gameInfo[0]);
-        game.MachineBoard = new Board(DeserializeBoard(gameInfo[1..11]));
-        game.PlayerBoard = new Board(DeserializeBoard(gameInfo[11..]));
-    }
-
-    private static Cell[,] DeserializeBoard(string[] gameInfo)
-    {
-        Cell[,] board = new Cell[Board.BoardSide, Board.BoardSide];
-        for (int v = 0; v < gameInfo.Length; v++)
-        {
-            string[] row = gameInfo[v].Split(" ");
-            for (int h = 0; h < row.Length; h++)
-            {
-                board[v, h] = new Cell()
-                {
-                    State = (CellState)int.Parse(row[h])
-                };
-            }
-        }
-        return board;
+        game.MachineBoard = new Board(DeserializeBoard(gameInfo[1..11], true));
+        game.PlayerBoard = new Board(DeserializeBoard(gameInfo[11..], false));
     }
 
     internal static string Save(Game game)
@@ -39,6 +22,23 @@ public class GameKeeper
         File.AppendAllLines(filePath, gameInfo);
 
         return filePath;
+    }
+
+    private static Cell[,] DeserializeBoard(string[] gameInfo, bool isMachineBoard)
+    {
+        Cell[,] board = new Cell[Board.BoardSide, Board.BoardSide];
+        for (int v = 0; v < gameInfo.Length; v++)
+        {
+            string[] row = gameInfo[v].Split(" ");
+            for (int h = 0; h < row.Length; h++)
+            {
+                board[v, h] = new Cell(isMachineBoard)
+                {
+                    State = (CellState)int.Parse(row[h])
+                };
+            }
+        }
+        return board;
     }
 
     private static List<string> Serialize(Game game)

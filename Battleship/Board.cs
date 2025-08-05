@@ -14,12 +14,12 @@ internal sealed class Board
 
     private readonly int[] _ships = [4, 3, 3, 2, 2, 2, 1, 1, 1, 1];
 
-    public Board(Cell[,] board)
+    internal Board(Cell[,] board)
     {
         UnderlyingBoard = board;
     }
 
-    public Board(bool autoGenerate)
+    internal Board(bool autoGenerate, bool isMachineBoard)
     {
         _isAutoGenerate = autoGenerate;
 
@@ -29,7 +29,7 @@ internal sealed class Board
         {
             for (int h = 0; h < BoardSide; h++)
             {
-                UnderlyingBoard[v, h] = new Cell();
+                UnderlyingBoard[v, h] = new Cell(isMachineBoard);
             }
         }
 
@@ -40,6 +40,67 @@ internal sealed class Board
         }
 
         AskForShips();
+    }
+
+    internal void Print()
+    {
+        Console.WriteLine(VerticalCoords);
+        for (int v = 0; v < BoardSide; v++)
+        {
+            StringBuilder sb = new();
+            sb.Append($"{v + 1}".PadRight(3));
+            for (int h = 0; h < BoardSide; h++)
+            {
+                sb.Append(UnderlyingBoard[v, h]);
+                sb.Append(' ');
+            }
+            Console.WriteLine(sb.ToString().TrimEnd());
+        }
+    }
+
+    internal bool CheckHumanMove(int coordY, int coordX)
+    {
+        if (UnderlyingBoard[coordY, coordX].State == CellState.Unbroken
+        || UnderlyingBoard[coordY, coordX].State == CellState.Damaged)
+        {
+            UnderlyingBoard[coordY, coordX].State = CellState.Damaged;
+            return true;
+        }
+
+        UnderlyingBoard[coordY, coordX].State = CellState.OffTarget;
+        return false;
+    }
+
+    internal bool GetUnshottedCell(int coordY, int coordX)
+    {
+        return
+            UnderlyingBoard[coordY, coordX].State != CellState.Damaged
+            && UnderlyingBoard[coordY, coordX].State != CellState.OffTarget;
+    }
+
+    internal void ChangeCellStatus(int coordY, int coordX, bool success)
+    {
+        if (success)
+        {
+            UnderlyingBoard[coordY, coordX].State = CellState.Damaged;
+            return;
+        }
+        UnderlyingBoard[coordY, coordX].State = CellState.OffTarget;
+    }
+
+    internal bool HasUnbrokenCell()
+    {
+        for (int v = 0; v < BoardSide; v++)
+        {
+            for (int h = 0; h < BoardSide; h++)
+            {
+                if (UnderlyingBoard[v, h].State == CellState.Unbroken)
+                {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void AskForShips()
@@ -190,67 +251,6 @@ internal sealed class Board
             }
         }
 
-        return false;
-    }
-
-    public void Print()
-    {
-        Console.WriteLine(VerticalCoords);
-        for (int v = 0; v < BoardSide; v++)
-        {
-            StringBuilder sb = new();
-            sb.Append($"{v + 1}".PadRight(3));
-            for (int h = 0; h < BoardSide; h++)
-            {
-                sb.Append(UnderlyingBoard[v, h]);
-                sb.Append(' ');
-            }
-            Console.WriteLine(sb.ToString().TrimEnd());
-        }
-    }
-
-    internal bool CheckHumanMove(int coordY, int coordX)
-    {
-        if (UnderlyingBoard[coordY, coordX].State == CellState.Unbroken
-        || UnderlyingBoard[coordY, coordX].State == CellState.Damaged)
-        {
-            UnderlyingBoard[coordY, coordX].State = CellState.Damaged;
-            return true;
-        }
-
-        UnderlyingBoard[coordY, coordX].State = CellState.OffTarget;
-        return false;
-    }
-
-    internal bool GetUnshottedCell(int coordY, int coordX)
-    {
-        return
-            UnderlyingBoard[coordY, coordX].State != CellState.Damaged
-            && UnderlyingBoard[coordY, coordX].State != CellState.OffTarget;
-    }
-
-    internal void ChangeCellStatus(int coordY, int coordX, bool success)
-    {
-        if (success)
-        {
-            UnderlyingBoard[coordY, coordX].State = CellState.Damaged;
-            return;
-        }
-        UnderlyingBoard[coordY, coordX].State = CellState.OffTarget;
-    }
-
-    internal bool HasUnbrokenCell()
-    {
-        for (int v = 0; v < BoardSide; v++)
-        {
-            for (int h = 0; h < BoardSide; h++)
-            {
-                if (UnderlyingBoard[v, h].State == CellState.Unbroken)
-                {
-                    return true;
-                }
-            }
-        }
         return false;
     }
 }

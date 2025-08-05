@@ -10,7 +10,7 @@ public sealed class Game
 
     private bool _gameIsOn = true;
 
-    public void Start()
+    internal void Start()
     {
         GameState userChoice;
         do
@@ -80,8 +80,8 @@ public sealed class Game
         _gameIsOn = true;
         if (isNew)
         {
-            MachineBoard = new Board(autoGenerate: true);
-            PlayerBoard = new Board(Dialog.AutoGenerateUserBoard());
+            MachineBoard = new Board(autoGenerate: true, isMachineBoard: true);
+            PlayerBoard = new Board(Dialog.AutoGenerateUserBoard(), false);
         }
 
         while (_gameIsOn)

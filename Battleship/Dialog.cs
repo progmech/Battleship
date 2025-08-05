@@ -17,6 +17,76 @@ internal static class Dialog
         return new Ship(line, shipSize, startX, endX, startY, endY);
     }
 
+    internal static bool GetHumanConfirmation(int coordY, int coordX)
+    {
+        Console.WriteLine(
+            $"Ход компьютера. Горизонталь: {_horizontalCoords[coordX]}, Вертикаль: {coordY + 1}");
+        Console.WriteLine("Попал? Да - 1, Нет - любая другая клавиша.");
+        var userInput = Console.ReadLine();
+        return !string.IsNullOrWhiteSpace(userInput)
+            && int.TryParse(userInput, out int userChoice)
+            && userChoice == 1;
+    }
+
+    internal static bool AutoGenerateUserBoard()
+    {
+        Console.WriteLine("Расставить ваши корабли в автоматическом режиме?");
+        Console.WriteLine("Да - 1, Нет - любая другая клавиша.");
+        string? userInput = Console.ReadLine();
+        return
+            !string.IsNullOrWhiteSpace(userInput)
+            && int.TryParse(userInput, out int userChoice)
+            && userChoice == 1;
+    }
+
+    internal static void PrintMenu()
+    {
+        Console.WriteLine("\n1. Новая игра");
+        Console.WriteLine("2. Загрузить игру");
+        Console.WriteLine("3. Сохранить игру");
+        Console.WriteLine("0. Выход\n");
+        Console.WriteLine("Ваш выбор:");
+    }
+
+    internal static GameState ValidateInput()
+    {
+        string userInput = Console.ReadLine();
+
+        if (string.IsNullOrWhiteSpace(userInput)
+        || !int.TryParse(userInput, out int userChoice)
+        || userChoice < (int)GameState.Quit
+        || userChoice > (int)GameState.Save)
+        {
+            Console.WriteLine("Неправильный ввод! Введите число от 0 до 3.");
+            return GameState.Menu;
+        }
+
+        return (GameState)userChoice;
+    }
+
+    internal static bool TryGetSingleCoord(CoordType coordType, Line line, out int coord)
+    {
+        AskForCoord(coordType, line);
+        string[] coords = line == Line.Horizontal
+            ? _horizontalCoords
+            : _verticalCoords;
+        string? userInput = Console.ReadLine();
+        if (!string.IsNullOrWhiteSpace(userInput)
+            && coords.Contains(userInput))
+        {
+            coord = Array.IndexOf(coords, userInput);
+            return true;
+        }
+
+        if (userInput == "0")
+        {
+            throw new QuitToSaveException();
+        }
+
+        coord = int.MinValue;
+        return false;
+    }
+
     private static (int, int) GetVerticalCoords(Line line, int shipSize)
     {
         while (true)
@@ -86,65 +156,6 @@ internal static class Dialog
         return line;
     }
 
-    internal static bool AutoGenerateUserBoard()
-    {
-        Console.WriteLine("Расставить ваши корабли в автоматическом режиме?");
-        Console.WriteLine("Да - 1, Нет - любая другая клавиша.");
-        string? userInput = Console.ReadLine();
-        return
-            !string.IsNullOrWhiteSpace(userInput)
-            && int.TryParse(userInput, out int userChoice)
-            && userChoice == 1;
-    }
-
-    internal static void PrintMenu()
-    {
-        Console.WriteLine("\n1. Новая игра");
-        Console.WriteLine("2. Загрузить игру");
-        Console.WriteLine("3. Сохранить игру");
-        Console.WriteLine("0. Выход\n");
-        Console.WriteLine("Ваш выбор:");
-    }
-
-    internal static GameState ValidateInput()
-    {
-        string userInput = Console.ReadLine();
-
-        if (string.IsNullOrWhiteSpace(userInput)
-        || !int.TryParse(userInput, out int userChoice)
-        || userChoice < (int)GameState.Quit
-        || userChoice > (int)GameState.Save)
-        {
-            Console.WriteLine("Неправильный ввод! Введите число от 0 до 3.");
-            return GameState.Menu;
-        }
-
-        return (GameState)userChoice;
-    }
-
-    public static bool TryGetSingleCoord(CoordType coordType, Line line, out int coord)
-    {
-        AskForCoord(coordType, line);
-        string[] coords = line == Line.Horizontal
-            ? _horizontalCoords
-            : _verticalCoords;
-        string? userInput = Console.ReadLine();
-        if (!string.IsNullOrWhiteSpace(userInput)
-            && coords.Contains(userInput))
-        {
-            coord = Array.IndexOf(coords, userInput);
-            return true;
-        }
-
-        if (userInput == "0")
-        {
-            throw new QuitToSaveException();
-        }
-
-        coord = int.MinValue;
-        return false;
-    }
-
     private static void AskForCoord(CoordType coordType, Line line)
     {
         string direction = line == Line.Horizontal
@@ -160,16 +171,5 @@ internal static class Dialog
 
         Console.WriteLine($"Введите{type} координату по {direction}.");
         Console.WriteLine($"Или введите 0 для выхода в меню.");
-    }
-
-    internal static bool GetHumanConfirmation(int coordY, int coordX)
-    {
-        Console.WriteLine(
-            $"Ход компьютера. Горизонталь: {_horizontalCoords[coordX]}, Вертикаль: {coordY + 1}");
-        Console.WriteLine("Попал? Да - 1, Нет - любая другая клавиша.");
-        var userInput = Console.ReadLine();
-        return !string.IsNullOrWhiteSpace(userInput)
-            && int.TryParse(userInput, out int userChoice)
-            && userChoice == 1;
     }
 }
