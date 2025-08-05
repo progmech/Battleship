@@ -203,4 +203,17 @@ internal sealed class Board
             Console.WriteLine(sb.ToString().TrimEnd());
         }
     }
+
+    internal bool CheckHumanMove(int coordY, int coordX)
+    {
+        if (_board[coordY, coordX].State == CellState.Unbroken
+        || _board[coordY, coordX].State == CellState.Damaged)
+        {
+            _board[coordY, coordX].State = CellState.Damaged;
+            return true;
+        }
+
+        _board[coordY, coordX].State = CellState.OffTarget;
+        return false;
+    }
 }

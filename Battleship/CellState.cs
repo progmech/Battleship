@@ -8,7 +8,5 @@ public enum CellState
 
     Damaged,
 
-    Destroyed,
-
-    AlongSide
+    OffTarget
 }

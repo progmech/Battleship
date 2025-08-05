@@ -17,44 +17,21 @@ internal static class Dialog
         return new Ship(line, shipSize, startX, endX, startY, endY);
     }
 
-    private static (int startY, int endY) GetVerticalCoords(Line line, int shipSize)
+    private static (int, int) GetVerticalCoords(Line line, int shipSize)
     {
         while (true)
         {
-            int startY = int.MinValue;
-            int endY = int.MinValue;
-            string userInput;
-
             if (line == Line.Horizontal || shipSize == 1)
             {
-                Console.WriteLine("Введите координату по вертикали (от 1 до 10).");
-                userInput = Console.ReadLine();
-                if (!string.IsNullOrWhiteSpace(userInput)
-                    && _verticalCoords.Contains(userInput))
+                if (TryGetSingleCoord(CoordType.Single, line, out int coord))
                 {
-                    int coord = Array.IndexOf(_verticalCoords, userInput);
                     return (coord, coord);
                 }
-
-                Console.WriteLine("Введены неправильные координаты!");
                 continue;
             }
 
-            Console.WriteLine("Введите начальную координату по вертикали (от 1 до 10).");
-            userInput = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(userInput)
-                && _verticalCoords.Contains(userInput))
-            {
-                startY = Array.IndexOf(_verticalCoords, userInput);
-            }
-
-            Console.WriteLine("Введите конечную координату по вертикали (от 1 до 10).");
-            userInput = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(userInput)
-                && _verticalCoords.Contains(userInput))
-            {
-                endY = Array.IndexOf(_verticalCoords, userInput);
-            }
+            TryGetSingleCoord(CoordType.Start, line, out int startY);
+            TryGetSingleCoord(CoordType.End, line, out int endY);
 
             if (startY != int.MinValue
                 && endY != int.MinValue
@@ -68,44 +45,21 @@ internal static class Dialog
         }
     }
 
-    private static (int startX, int endX) GetHorizontalCoords(Line line, int shipSize)
+    private static (int, int) GetHorizontalCoords(Line line, int shipSize)
     {
         while (true)
         {
-            int startX = int.MinValue;
-            int endX = int.MinValue;
-            string userInput;
-
             if (line == Line.Vertical || shipSize == 1)
             {
-                Console.WriteLine("Введите координату по горизонтали (от А до К).");
-                userInput = Console.ReadLine();
-                if (!string.IsNullOrWhiteSpace(userInput)
-                    && _horizontalCoords.Contains(userInput))
+                if (TryGetSingleCoord(CoordType.Single, line, out int coord))
                 {
-                    int coord = Array.IndexOf(_horizontalCoords, userInput);
                     return (coord, coord);
                 }
-
-                Console.WriteLine("Введены неправильные координаты!");
                 continue;
             }
 
-            Console.WriteLine("Введите начальную координату по горизонтали (от А до К).");
-            userInput = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(userInput)
-                && _horizontalCoords.Contains(userInput))
-            {
-                startX = Array.IndexOf(_horizontalCoords, userInput);
-            }
-
-            Console.WriteLine("Введите конечную координату по горизонтали (от А до К).");
-            userInput = Console.ReadLine();
-            if (!string.IsNullOrWhiteSpace(userInput)
-                && _horizontalCoords.Contains(userInput))
-            {
-                endX = Array.IndexOf(_horizontalCoords, userInput);
-            }
+            TryGetSingleCoord(CoordType.Start, line, out int startX);
+            TryGetSingleCoord(CoordType.End, line, out int endX);
 
             if (startX != int.MinValue
                 && endX != int.MinValue
@@ -166,5 +120,40 @@ internal static class Dialog
         }
 
         return (GameState)userChoice;
+    }
+
+    public static bool TryGetSingleCoord(CoordType coordType, Line line, out int coord)
+    {
+        AskForCoord(coordType, line);
+        string[] coords = line == Line.Horizontal
+            ? _horizontalCoords
+            : _verticalCoords;
+        string? userInput = Console.ReadLine();
+        if (!string.IsNullOrWhiteSpace(userInput)
+            && coords.Contains(userInput))
+        {
+            coord = Array.IndexOf(coords, userInput);
+            return true;
+        }
+
+        coord = int.MinValue;
+        return false;
+    }
+
+    private static void AskForCoord(CoordType coordType, Line line)
+    {
+        string direction = line == Line.Horizontal
+            ? "горизонтали (от А до К)"
+            : "вертикали (от 1 до 10)";
+
+        string type = coordType switch
+        {
+            CoordType.Start => " начальную",
+            CoordType.End => " конечную",
+            _ => ""
+        };
+
+        Console.WriteLine($"Введите{type} координату по {direction}.");
+        Console.WriteLine($"Или введите 0 для выхода в меню.");
     }
 }
